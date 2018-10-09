@@ -1,0 +1,32 @@
+---
+- name: creater openshift platform administrator account 
+  shell: htpasswd -b /etc/origin/master/htpasswd {{ username | default('caasadmin') }} {{ password | default('M4ssQrm0*') }}
+
+- name: restart master api
+  shell: master-restart api
+
+- name: user login openshift platform
+  shell: "oc login https://{{ cluster_domain }}:8443 --username={{ username | default('caasadmin') }} --password={{ password | default('M4ssQrm0*') }}"
+  when: inventory_hostname == groups['masters'] | first
+  register: result
+  until: result.stdout.find("Login successful") != -1
+  retries: 30
+  delay: 10
+
+- name: login openshift platform use default user
+  shell: oc login  --config=.kube/config --username=system:admin
+  when: inventory_hostname == groups['masters'] | first
+
+
+- name: set the policy of user caasadmin
+  shell: oc adm policy add-cluster-role-to-user cluster-admin {{ username | default('caasadmin') }}
+  when: inventory_hostname == groups['masters'] | first
+
+- name: copy storageclass config file to master1
+  template: src=storageclass.j2  dest=/opt/storageclass
+  when: inventory_hostname == groups['masters'] | first
+
+- name: create storageclass object in openshift cluster
+  shell: oc create -f /opt/storageclass
+  when: inventory_hostname == groups['masters'] | first
+

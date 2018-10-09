@@ -1,0 +1,11 @@
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: glusterfsdyn
+provisioner: kubernetes.io/glusterfs
+parameters:
+  resturl: "http://{{ groups['heketi'] | join( ) }}:8080"
+  restauthenabled: "false" 
+  gidMin: "40000"
+  gidMax: "50000"
+  volumetype: "replicate:2"

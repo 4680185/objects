@@ -1,0 +1,8 @@
+[masters]
+10.1.1.95
+10.1.1.219
+10.1.1.190
+[all:vars]
+cluster_domain=beiqijia.caas.cloudstack
+[heketi]
+10.1.1.242
